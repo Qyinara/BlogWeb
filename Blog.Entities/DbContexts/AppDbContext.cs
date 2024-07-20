@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,19 +30,17 @@ namespace Blog.Entities.DbContexts
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                var serverVersion = new MySqlServerVersion(new Version(8, 0)); // MySQL sunucu sürümünü belirtin
 
-                optionsBuilder.UseMySql("server=localhost;port=3306;database=BlogApp;user=root;password=admin",
-                    serverVersion);
-            }
+            base.OnConfiguring(optionsBuilder);
+            var connectionString = "Server=localhost;Database=BlogWebDb;Uid=root;Pwd=admin;";
+            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            //optionsBuilder.UseMySQL(@"server=localhost;port=3306;user=root;password=admin;database=BlogWebDb;");
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
- 
 
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         }
