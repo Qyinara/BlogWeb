@@ -4,17 +4,18 @@ using Blog.Entities.DbContexts;
 using Blog.Entities.Models.Abstract;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Blog.BL.Managers.Concrete
 {
     public class ManagerBase<T> : Repository<T>, IManager<T> where T : BaseEntity
     {
+        protected readonly AppDbContext _context;
+
         public ManagerBase(AppDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public override int Insert(T entity)
@@ -41,6 +42,20 @@ namespace Blog.BL.Managers.Concrete
         {
             return base.GetAll(predicate);
         }
+
+        public override IQueryable<T> GetAllInclude(Expression<Func<T, bool>>? predicate, params Expression<Func<T, object>>[] include)
+        {
+            return base.GetAllInclude(predicate, include);
+        }
+
+        public Task<T> ValidateUserAsync(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
-
