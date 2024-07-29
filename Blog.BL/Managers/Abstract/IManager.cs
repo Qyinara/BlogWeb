@@ -14,6 +14,7 @@ namespace Blog.BL.Managers.Abstract
         int Insert(T input);
         int Update(T input);
         int Delete(T input);
+        int DeleteById(int id);
         T GetById(int id);
         List<T> GetAll(Expression<Func<T, bool>> predicate = null);
         T Get(Expression<Func<T, bool>> predicate = null);
