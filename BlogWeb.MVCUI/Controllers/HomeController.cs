@@ -15,6 +15,10 @@ namespace BlogWeb.MVCUI.Controllers
 
         public IActionResult Index()
         {
+            if (TempData["Message"] != null)
+            {
+                ViewBag.Message = TempData["Message"];
+            }
             return View();
         }
 

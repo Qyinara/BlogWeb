@@ -1,5 +1,4 @@
-﻿using Blog.Entities.Models;
-using Blog.Entities.Models.Concrete;
+﻿using Blog.Entities.Models.Concrete;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;

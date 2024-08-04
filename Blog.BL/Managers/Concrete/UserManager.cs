@@ -2,11 +2,6 @@
 using Blog.Entities.DbContexts;
 using Blog.Entities.Models.Concrete;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Blog.BL.Managers.Concrete
@@ -17,17 +12,38 @@ namespace Blog.BL.Managers.Concrete
         {
         }
 
-        public async Task<User> ValidateUserAsync(string username, string password)
+        public async Task<User?> ValidateUserAsync(string username, string password)
         {
             return await _context.Users
+                .Include(u => u.Rolee)
                 .FirstOrDefaultAsync(u => u.UserName == username && u.Password == password);
         }
 
         public async Task AddAsync(User user)
         {
-            await _context.Users.AddAsync(user);
+            if (await _context.Users.AnyAsync(u => u.UserName == user.UserName))
+            {
+                throw new InvalidOperationException("Username already exists.");
+            }
+
+            // Role kontrolü ve var olan Role ataması
+            if (user.Rolee == null || string.IsNullOrWhiteSpace(user.Rolee.RoleName))
+            {
+                user.Rolee = await _context.Roles.FindAsync(user.RoleId) ?? throw new InvalidOperationException("Role does not exist.");
+            }
+            else
+            {
+                var existingRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == user.Rolee.RoleName);
+                if (existingRole != null)
+                {
+                    user.Rolee = existingRole;
+                }
+
+            }
+
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
+
     }
 }
-

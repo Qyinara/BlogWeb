@@ -21,6 +21,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Add Dependency Injection for Managers and TokenService
 builder.Services.AddScoped<IManager<Category>, CategoryManager>();
+builder.Services.AddScoped<IManager<User>, UserManager>();
+builder.Services.AddScoped<IManager<Role>, RoleManager>();
+builder.Services.AddScoped<IManager<Post>, PostManager>();
+builder.Services.AddScoped<IManager<Comment>, CommentManager>();
+builder.Services.AddScoped<IManager<PostLike>, PostLikeManager>();
+builder.Services.AddScoped<IManager<CommentLike>, CommentLikeManager>();
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddEndpointsApiExplorer();

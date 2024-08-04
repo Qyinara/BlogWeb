@@ -1,9 +1,11 @@
 ﻿using Blog.Api.Models;
-using Blog.Api.Models;
 using Blog.BL.Managers.Abstract;
 using Blog.Entities.Models.Concrete;
+using BlogWeb.MVCUI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+
+
 
 namespace Blog.Api.Controllers
 {
@@ -23,6 +25,8 @@ namespace Blog.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserDTO model)
         {
+
+
             var user = await _userManager.ValidateUserAsync(model.UserName, model.Password);
             if (user == null)
             {
@@ -45,8 +49,12 @@ namespace Blog.Api.Controllers
             var user = new User
             {
                 UserName = model.UserName,
+                Name = model.Name,
+                LastName = model.LastName,
+                Mail = model.Mail,
                 Password = model.Password,
-                Role = "User" // Varsayılan rol
+                ProfilePhotoUrl = model.ProfilePhotoUrl,
+
             };
 
             await _userManager.AddAsync(user);

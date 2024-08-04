@@ -20,7 +20,7 @@ namespace Blog.Entities.Models.Concrete
 
 
         public int RoleId { get; set; }
-        public Role Rolee { get; set; }
+        public Role? Rolee { get; set; }
 
 
     }

@@ -25,4 +25,3 @@ namespace Blog.BL.Managers.Abstract
         Task AddAsync(T entity);
     }
 }
-

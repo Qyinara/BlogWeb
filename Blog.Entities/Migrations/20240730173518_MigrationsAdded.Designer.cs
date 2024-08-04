@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Entities.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240719211010_FirstMigrationsss")]
-    partial class FirstMigrationsss
+    [Migration("20240730173518_MigrationsAdded")]
+    partial class MigrationsAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(2183));
+                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 371, DateTimeKind.Utc).AddTicks(8806));
 
                     b.HasKey("Id");
 
@@ -87,13 +87,13 @@ namespace Blog.Entities.Migrations
                         {
                             Id = 1,
                             CategoryName = "Yazılım",
-                            CreateDate = new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(2985)
+                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9620)
                         },
                         new
                         {
                             Id = 2,
                             CategoryName = "Donanım",
-                            CreateDate = new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(2995)
+                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9632)
                         });
                 });
 
@@ -232,7 +232,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(4475));
+                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(1221));
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -250,13 +250,13 @@ namespace Blog.Entities.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(5158),
+                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1901),
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreateDate = new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(5163),
+                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1905),
                             RoleName = "User"
                         });
                 });
@@ -272,7 +272,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(6454));
+                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(3368));
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -321,6 +321,21 @@ namespace Blog.Entities.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(4655),
+                            LastName = "Aydemir",
+                            Mail = "erolaydemir27@gmail.com",
+                            Name = "Erol",
+                            Password = "admin",
+                            ProfilePhotoUrl = " ",
+                            Role = "Admin",
+                            RoleId = 1,
+                            UserName = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("Blog.Entities.Models.Concrete.Activity", b =>

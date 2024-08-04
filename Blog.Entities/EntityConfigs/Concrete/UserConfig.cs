@@ -1,6 +1,7 @@
 ﻿using Blog.Entities.EntityConfigs.Abstract;
 using Blog.Entities.Models.Concrete;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +25,11 @@ namespace Blog.Entities.EntityConfigs.Concrete
 
 
             builder.HasIndex(p => p.Mail).IsUnique();
-            builder.HasIndex(p => p.Password).IsUnique();   
-            
+            builder.HasIndex(p => p.Password).IsUnique();
 
+            builder.HasData(
+                new User { Id = 1, Name = "Erol", LastName = "Aydemir", Mail = "erolaydemir27@gmail.com", Password = "admin", UserName = "Admin", ProfilePhotoUrl = " ", RoleId = 1, Role = "Admin", CreateDate = DateTime.Now }
+                );
 
 
         }

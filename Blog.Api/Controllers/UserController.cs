@@ -43,7 +43,7 @@ namespace Blog.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, User user)
+        public async Task<IActionResult> Update(int id, [FromBody] User user)
         {
             if (id != user.Id)
             {

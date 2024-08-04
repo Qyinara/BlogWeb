@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Blog.Entities.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstMigrationsss : Migration
+    public partial class MigrationsAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,7 @@ namespace Blog.Entities.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     CategoryName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(2183))
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 30, 17, 35, 18, 371, DateTimeKind.Utc).AddTicks(8806))
                 },
                 constraints: table =>
                 {
@@ -41,7 +41,7 @@ namespace Blog.Entities.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     RoleName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(4475))
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(1221))
                 },
                 constraints: table =>
                 {
@@ -70,7 +70,7 @@ namespace Blog.Entities.Migrations
                     ProfilePhotoUrl = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RoleId = table.Column<int>(type: "int", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 19, 21, 10, 9, 718, DateTimeKind.Utc).AddTicks(6454))
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValue: new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(3368))
                 },
                 constraints: table =>
                 {
@@ -237,8 +237,8 @@ namespace Blog.Entities.Migrations
                 columns: new[] { "Id", "CategoryName", "CreateDate" },
                 values: new object[,]
                 {
-                    { 1, "Yazılım", new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(2985) },
-                    { 2, "Donanım", new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(2995) }
+                    { 1, "Yazılım", new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9620) },
+                    { 2, "Donanım", new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9632) }
                 });
 
             migrationBuilder.InsertData(
@@ -246,9 +246,14 @@ namespace Blog.Entities.Migrations
                 columns: new[] { "Id", "CreateDate", "RoleName" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(5158), "Admin" },
-                    { 2, new DateTime(2024, 7, 20, 0, 10, 9, 718, DateTimeKind.Local).AddTicks(5163), "User" }
+                    { 1, new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1901), "Admin" },
+                    { 2, new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1905), "User" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "CreateDate", "LastName", "Mail", "Name", "Password", "ProfilePhotoUrl", "Role", "RoleId", "UserName" },
+                values: new object[] { 1, new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(4655), "Aydemir", "erolaydemir27@gmail.com", "Erol", "admin", " ", "Admin", 1, "Admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_UserId",

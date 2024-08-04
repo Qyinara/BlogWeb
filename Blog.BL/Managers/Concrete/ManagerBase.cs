@@ -32,7 +32,7 @@ namespace Blog.BL.Managers.Concrete
         {
             return base.Delete(entity);
         }
-        public override int DeleteById(int id) 
+        public override int DeleteById(int id)
         {
             return base.DeleteById(id);
         }
