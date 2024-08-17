@@ -20,8 +20,14 @@ namespace Blog.BL.Managers.Abstract
         T Get(Expression<Func<T, bool>> predicate = null);
         IQueryable<T> GetAllInclude(Expression<Func<T, bool>>? predicate, params Expression<Func<T, object>>[] include);
 
+       
 
-        Task<T> ValidateUserAsync(string username, string password);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T?> GetByIdAsync(int id);
         Task AddAsync(T entity);
+        Task UpdateAsync(T entity); // Bu satırı ekleyin
+        Task DeleteByIdAsync(int id);
+        Task<T> ValidateUserAsync(string username, string password);
+
     }
 }

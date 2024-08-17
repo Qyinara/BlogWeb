@@ -1,5 +1,6 @@
 ﻿using Blog.BL.Managers.Abstract;
 using Blog.Entities.Models.Concrete;
+using BlogWeb.MVCUI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,10 +12,14 @@ namespace Blog.Api.Controllers
     public class PostController : ControllerBase
     {
         private readonly IManager<Post> _postManager;
+        private readonly IManager<User> _userManager;
+        private readonly IManager<Category> _categoryManager;
 
-        public PostController(IManager<Post> postManager)
+        public PostController(IManager<Post> postManager, IManager<User> userManager, IManager<Category> categoryManager)
         {
             _postManager = postManager;
+            _userManager = userManager;
+            _categoryManager = categoryManager;
         }
 
         [HttpGet]
@@ -36,11 +41,32 @@ namespace Blog.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Post>> Create(Post post)
+        public async Task<ActionResult<Post>> Create(PostViewModel post)
         {
-            await Task.Run(() => _postManager.Insert(post));
-            return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
+            if (ModelState.IsValid)
+            {
+                var user = _userManager.GetById(post.AuthorId);
+                var category = _categoryManager.GetById(post.CategoryId);
+
+                Post newPost = new Post()
+                {
+                    AuthorId = post.AuthorId,
+                    CategoryId = post.CategoryId,
+                    Content = post.Content,
+                    Title = post.Title,
+                    Comments = post.Comments,
+                    PostImageURL = post.PostImageURL,
+                    CreateDate = DateTime.Now,
+                    PostLikes = post.PostLikes,
+                    Author=user,
+                    Category=category
+                };
+                await _postManager.AddAsync(newPost);
+                //return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
+            }
+            return BadRequest(ModelState);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, Post post)

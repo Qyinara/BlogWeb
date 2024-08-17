@@ -22,6 +22,6 @@ namespace Blog.Entities.Models.Concrete
         public int RoleId { get; set; }
         public Role? Rolee { get; set; }
 
-
+        public ICollection<Post> Posts { get; set; } = new List<Post>(); // Eklenmesi gereken ilişki
     }
 }

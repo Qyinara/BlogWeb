@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+
+}
+
+<div class="container mt-4">
+    <h2>Welcome to the Admin Dashboard</h2>
+    <p class="lead">Use the navigation bar to manage categories, posts, and users.</p>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Manage Categories</div>
+                <div class="card-body">
+                    <p class="card-text">Create, update, and delete categories for your blog posts.</p>
+                    <a href="@Url.Action("Categories", "Admin")" class="btn btn-light">Go to Categories</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Manage Posts</div>
+                <div class="card-body">
+                    <p class="card-text">Create, update, and delete blog posts.</p>
+                    <a href="@Url.Action("Posts", "Admin")" class="btn btn-light">Go to Posts</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Manage Users</div>
+                <div class="card-body">
+                    <p class="card-text">View, update, and delete users.</p>
+                    <a href="@Url.Action("Users", "Admin")" class="btn btn-light">Go to Users</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

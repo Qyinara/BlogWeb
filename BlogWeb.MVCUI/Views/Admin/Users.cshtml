@@ -1,0 +1,37 @@
+﻿@model IEnumerable<BlogWeb.MVCUI.Models.UserViewModel>
+
+@{
+    ViewBag.Title = "Users";
+}
+
+<h2>Users</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Profile Photo</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Mail</td>
+                <td><img src="@user.ProfilePhotoUrl" alt="Profile Photo" width="50" height="50" /></td>
+                <td>@user.Role</td>
+                <td>
+                    <a href="@Url.Action("UpdateUser", "Admin", new { id = user.Id })" class="btn btn-primary">Edit</a>
+                    <form asp-action="DeleteUser" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

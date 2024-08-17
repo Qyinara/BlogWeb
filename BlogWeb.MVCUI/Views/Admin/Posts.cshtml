@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Blog.Entities.Models.Concrete.Post>
+
+@{
+    ViewBag.Title = "Posts";
+
+}
+
+<h2>Posts</h2>
+
+<a href="@Url.Action("AddPost", "Admin")" class="btn btn-primary mb-3">Add New Post</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var post in Model)
+        {
+            <tr>
+                <td>@post.Title</td>
+                <td>@post.Author?.UserName</td>
+                <td>@post.Category?.CategoryName</td>
+                <td>
+                    <a href="@Url.Action("UpdatePost", "Admin", new { id = post.Id })" class="btn btn-primary">Edit</a>
+                    <form asp-action="DeletePost" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@post.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

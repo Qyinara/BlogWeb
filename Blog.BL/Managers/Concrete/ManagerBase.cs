@@ -2,8 +2,10 @@
 using Blog.DAL.Repository.Concrete;
 using Blog.Entities.DbContexts;
 using Blog.Entities.Models.Abstract;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -16,6 +18,38 @@ namespace Blog.BL.Managers.Concrete
         public ManagerBase(AppDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await _context.Set<T>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(T entity)
+        {
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteByIdAsync(int id)
+        {
+            var entity = await _context.Set<T>().FindAsync(id);
+            if (entity != null)
+            {
+                _context.Set<T>().Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<T> GetByIdAsync(int id)
+        {
+            return await _context.Set<T>().FindAsync(id);
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _context.Set<T>().ToListAsync();
         }
 
         public override int Insert(T entity)
@@ -32,6 +66,7 @@ namespace Blog.BL.Managers.Concrete
         {
             return base.Delete(entity);
         }
+
         public override int DeleteById(int id)
         {
             return base.DeleteById(id);
@@ -54,11 +89,7 @@ namespace Blog.BL.Managers.Concrete
 
         public Task<T> ValidateUserAsync(string username, string password)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task AddAsync(T entity)
-        {
+            // Bu metod, UserManager gibi özel sınıflar tarafından override edilmelidir.
             throw new NotImplementedException();
         }
     }

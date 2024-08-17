@@ -27,6 +27,12 @@ builder.Services.AddScoped<IManager<Activity>, ActivityManager>();
 // TokenService'i kaydet
 builder.Services.AddScoped<TokenService>();
 
+// Add HttpClient and configure base address
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]);
+});
+
 // JWT Authentication
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
 builder.Services.AddAuthentication(options =>

@@ -66,6 +66,7 @@ namespace BlogWeb.MVCUI.Controllers
                 Mail = model.Mail,
                 Password = model.Password,
                 RoleId = 2, // Varsayılan olarak "User" rolü, ID'si 2
+                Role = "User",
                 Rolee = null
             };
 

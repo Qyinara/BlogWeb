@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Entities.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240730173518_MigrationsAdded")]
-    partial class MigrationsAdded
+    [Migration("20240816193354_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 371, DateTimeKind.Utc).AddTicks(8806));
+                        .HasDefaultValue(new DateTime(2024, 8, 16, 19, 33, 54, 43, DateTimeKind.Utc).AddTicks(6348));
 
                     b.HasKey("Id");
 
@@ -87,13 +87,13 @@ namespace Blog.Entities.Migrations
                         {
                             Id = 1,
                             CategoryName = "Yazılım",
-                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9620)
+                            CreateDate = new DateTime(2024, 8, 16, 22, 33, 54, 43, DateTimeKind.Local).AddTicks(7246)
                         },
                         new
                         {
                             Id = 2,
                             CategoryName = "Donanım",
-                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 371, DateTimeKind.Local).AddTicks(9632)
+                            CreateDate = new DateTime(2024, 8, 16, 22, 33, 54, 43, DateTimeKind.Local).AddTicks(7259)
                         });
                 });
 
@@ -176,15 +176,19 @@ namespace Blog.Entities.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValue(new DateTime(2024, 8, 16, 19, 33, 54, 43, DateTimeKind.Utc).AddTicks(9135));
 
                     b.Property<string>("PostImageURL")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("Id");
 
@@ -232,7 +236,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(1221));
+                        .HasDefaultValue(new DateTime(2024, 8, 16, 19, 33, 54, 44, DateTimeKind.Utc).AddTicks(6218));
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -250,13 +254,13 @@ namespace Blog.Entities.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1901),
+                            CreateDate = new DateTime(2024, 8, 16, 22, 33, 54, 44, DateTimeKind.Local).AddTicks(6999),
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(1905),
+                            CreateDate = new DateTime(2024, 8, 16, 22, 33, 54, 44, DateTimeKind.Local).AddTicks(7004),
                             RoleName = "User"
                         });
                 });
@@ -272,7 +276,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 7, 30, 17, 35, 18, 372, DateTimeKind.Utc).AddTicks(3368));
+                        .HasDefaultValue(new DateTime(2024, 8, 16, 19, 33, 54, 44, DateTimeKind.Utc).AddTicks(8536));
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -326,7 +330,7 @@ namespace Blog.Entities.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2024, 7, 30, 20, 35, 18, 372, DateTimeKind.Local).AddTicks(4655),
+                            CreateDate = new DateTime(2024, 8, 16, 22, 33, 54, 44, DateTimeKind.Local).AddTicks(9899),
                             LastName = "Aydemir",
                             Mail = "erolaydemir27@gmail.com",
                             Name = "Erol",
@@ -390,13 +394,13 @@ namespace Blog.Entities.Migrations
             modelBuilder.Entity("Blog.Entities.Models.Concrete.Post", b =>
                 {
                     b.HasOne("Blog.Entities.Models.Concrete.User", "Author")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Blog.Entities.Models.Concrete.Category", "Category")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -436,6 +440,11 @@ namespace Blog.Entities.Migrations
                     b.Navigation("Rolee");
                 });
 
+            modelBuilder.Entity("Blog.Entities.Models.Concrete.Category", b =>
+                {
+                    b.Navigation("Posts");
+                });
+
             modelBuilder.Entity("Blog.Entities.Models.Concrete.Comment", b =>
                 {
                     b.Navigation("CommentLikes");
@@ -451,6 +460,11 @@ namespace Blog.Entities.Migrations
             modelBuilder.Entity("Blog.Entities.Models.Concrete.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Blog.Entities.Models.Concrete.User", b =>
+                {
+                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }

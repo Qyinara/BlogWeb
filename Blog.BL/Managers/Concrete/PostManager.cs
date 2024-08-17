@@ -38,6 +38,10 @@ namespace Blog.BL.Managers.Concrete
         {
             return base.GetById(id);
         }
+        public new async Task AddAsync(Post entity)
+        {
+            await base.AddAsync(entity); // Asenkron olarak veriyi ekliyoruz
+        }
 
         public new List<Post> GetAll()
         {
