@@ -23,7 +23,7 @@ namespace Blog.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDTO model)
+        public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
 
 

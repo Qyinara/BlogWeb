@@ -1,12 +1,12 @@
 ﻿@model PostViewModel
 
 @{
-    ViewBag.Title = "Add New Post";
+    ViewBag.Title = "Update Post";
 }
 
-<h2>Add New Post</h2>
+<h2>Update Post</h2>
 
-<form asp-action="AddPost" method="post">
+<form asp-action="UpdatePost" method="post">
     <div class="form-group">
         <label asp-for="Title"></label>
         <input asp-for="Title" class="form-control" placeholder="Enter post title" />
@@ -23,9 +23,9 @@
         <label asp-for="CategoryId">Select Category</label>
         <select asp-for="CategoryId" class="form-control">
             <option value="">Select Category</option>
-            @foreach (var category in ViewBag.Categories)
+            @foreach (var category in (List<SelectListItem>)ViewBag.Categories)
             {
-                <option value="@category.Id">@category.CategoryName</option>
+                <option value="@category.Value">@category.Text</option>
             }
         </select>
         <span asp-validation-for="CategoryId" class="text-danger"></span>
@@ -35,16 +35,9 @@
         <label asp-for="AuthorId">Select Author</label>
         <select asp-for="AuthorId" class="form-control">
             <option value="">Select Author</option>
-            @if (ViewBag.Authors != null)
+            @foreach (var author in (List<SelectListItem>)ViewBag.Authors)
             {
-                @foreach (var author in ViewBag.Authors)
-                {
-                    <option value="@author.Id">@author.UserName</option>
-                }
-            }
-            else
-            {
-                <option disabled>Author listesi yüklenemedi. Lütfen daha sonra tekrar deneyin.</option>
+                <option value="@author.Value">@author.Text</option>
             }
         </select>
         <span asp-validation-for="AuthorId" class="text-danger"></span>
@@ -54,8 +47,16 @@
         <label asp-for="PostImageURL">Image URL</label>
         <input asp-for="PostImageURL" class="form-control" placeholder="Enter image URL" />
         <span asp-validation-for="PostImageURL" class="text-danger"></span>
+        @if (!string.IsNullOrEmpty(Model.PostImageURL))
+        {
+            <div class="mt-2">
+                <img src="@Model.PostImageURL" alt="@Model.Title" style="max-width: 100px;" />
+            </div>
+        }
     </div>
 
-    <button type="submit" class="btn btn-primary">Add Post</button>
+    <input type="hidden" asp-for="Id" />
+
+    <button type="submit" class="btn btn-primary">Update Post</button>
     <a href="@Url.Action("Posts", "Admin")" class="btn btn-secondary">Back to Posts</a>
 </form>

@@ -4,6 +4,7 @@ using Blog.Entities.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blog.Entities.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240818085357_MakeCommentImageURLNullable")]
+    partial class MakeCommentImageURLNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,7 +73,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 57, 36, 725, DateTimeKind.Utc).AddTicks(4916));
+                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 53, 57, 54, DateTimeKind.Utc).AddTicks(317));
 
                     b.HasKey("Id");
 
@@ -84,13 +87,13 @@ namespace Blog.Entities.Migrations
                         {
                             Id = 1,
                             CategoryName = "Yazılım",
-                            CreateDate = new DateTime(2024, 8, 18, 11, 57, 36, 725, DateTimeKind.Local).AddTicks(5668)
+                            CreateDate = new DateTime(2024, 8, 18, 11, 53, 57, 54, DateTimeKind.Local).AddTicks(1084)
                         },
                         new
                         {
                             Id = 2,
                             CategoryName = "Donanım",
-                            CreateDate = new DateTime(2024, 8, 18, 11, 57, 36, 725, DateTimeKind.Local).AddTicks(5681)
+                            CreateDate = new DateTime(2024, 8, 18, 11, 53, 57, 54, DateTimeKind.Local).AddTicks(1095)
                         });
                 });
 
@@ -106,6 +109,7 @@ namespace Blog.Entities.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CommentImageURL")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Content")
@@ -174,7 +178,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 57, 36, 725, DateTimeKind.Utc).AddTicks(7239));
+                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 53, 57, 54, DateTimeKind.Utc).AddTicks(2772));
 
                     b.Property<string>("PostImageURL")
                         .IsRequired()
@@ -232,7 +236,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 57, 36, 726, DateTimeKind.Utc).AddTicks(3328));
+                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 53, 57, 54, DateTimeKind.Utc).AddTicks(8964));
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -250,13 +254,13 @@ namespace Blog.Entities.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2024, 8, 18, 11, 57, 36, 726, DateTimeKind.Local).AddTicks(4009),
+                            CreateDate = new DateTime(2024, 8, 18, 11, 53, 57, 54, DateTimeKind.Local).AddTicks(9643),
                             RoleName = "Admin"
                         },
                         new
                         {
                             Id = 2,
-                            CreateDate = new DateTime(2024, 8, 18, 11, 57, 36, 726, DateTimeKind.Local).AddTicks(4014),
+                            CreateDate = new DateTime(2024, 8, 18, 11, 53, 57, 54, DateTimeKind.Local).AddTicks(9647),
                             RoleName = "User"
                         });
                 });
@@ -272,7 +276,7 @@ namespace Blog.Entities.Migrations
                     b.Property<DateTime>("CreateDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 57, 36, 726, DateTimeKind.Utc).AddTicks(5315));
+                        .HasDefaultValue(new DateTime(2024, 8, 18, 8, 53, 57, 55, DateTimeKind.Utc).AddTicks(981));
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -326,7 +330,7 @@ namespace Blog.Entities.Migrations
                         new
                         {
                             Id = 1,
-                            CreateDate = new DateTime(2024, 8, 18, 11, 57, 36, 726, DateTimeKind.Local).AddTicks(6545),
+                            CreateDate = new DateTime(2024, 8, 18, 11, 53, 57, 55, DateTimeKind.Local).AddTicks(2189),
                             LastName = "Aydemir",
                             Mail = "erolaydemir27@gmail.com",
                             Name = "Erol",

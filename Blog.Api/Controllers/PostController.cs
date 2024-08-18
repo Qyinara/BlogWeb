@@ -69,16 +69,36 @@ namespace Blog.Api.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Post post)
+        public async Task<IActionResult> Update(int id, PostViewModel model)
         {
-            if (id != post.Id)
+            if (id != model.Id)
             {
                 return BadRequest();
             }
 
+            var post = await Task.FromResult(_postManager.GetById(id));
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            // Mevcut Author ve Category bilgilerini alıyoruz
+            var author = _userManager.GetById(model.AuthorId);
+            var category = _categoryManager.GetById(model.CategoryId);
+
+            post.Title = model.Title;
+            post.Content = model.Content;
+            post.CategoryId = model.CategoryId;
+            post.AuthorId = model.AuthorId;
+            post.PostImageURL = model.PostImageURL;
+            post.Author = author;
+            post.Category = category;
+
             await Task.Run(() => _postManager.Update(post));
+
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

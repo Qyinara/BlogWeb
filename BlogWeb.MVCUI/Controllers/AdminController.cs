@@ -232,7 +232,7 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                return RedirectToAction("Posts",post);
+                return RedirectToAction("Posts");
             }
 
             var categorieses = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
@@ -245,6 +245,85 @@ namespace BlogWeb.MVCUI.Controllers
             return View(post);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> UpdatePost(int id)
+        {
+            var post = await _httpClient.GetFromJsonAsync<Post>($"api/Post/{id}");
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            var postViewModel = new PostViewModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                CategoryId = post.CategoryId,
+                AuthorId = post.AuthorId,
+                PostImageURL = post.PostImageURL
+            };
+
+            var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
+            ViewBag.Categories = categories.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.CategoryName
+            }).ToList();
+
+            var authors = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
+            ViewBag.Authors = authors.Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.UserName
+            }).ToList();
+
+            return View(postViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePost(PostViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var post = await _httpClient.GetFromJsonAsync<Post>($"api/Post/{model.Id}");
+                if (post == null)
+                {
+                    return NotFound();
+                }
+                post.Id = model.Id;
+                post.Title = model.Title;
+                post.Content = model.Content;
+                post.CategoryId = model.CategoryId;
+                post.AuthorId = model.AuthorId;
+                post.PostImageURL = model.PostImageURL; // Sadece URL üzerinden işlem yapıyoruz
+
+                var response = await _httpClient.PutAsJsonAsync($"api/Post/{post.Id}", post);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Posts");
+                }
+
+                ModelState.AddModelError("", "Error updating post.");
+            }
+
+            var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
+            ViewBag.Categories = categories.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.CategoryName
+            }).ToList();
+
+            var authors = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
+            ViewBag.Authors = authors.Select(a => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            {
+                Value = a.Id.ToString(),
+                Text = a.UserName
+            }).ToList();
+
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> DeletePost(int id)

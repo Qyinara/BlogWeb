@@ -15,7 +15,7 @@ namespace Blog.Entities.Models.Concrete
         public int AuthorId { get; set; }
         public User Author { get; set; } 
         public string Content { get; set; }
-        public string CommentImageURL { get; set; }
+        public string? CommentImageURL { get; set; }
 
 
 

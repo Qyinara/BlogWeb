@@ -13,7 +13,9 @@
     <thead>
         <tr>
             <th>Name</th>
+            <th>Create Date</th>
             <th>Actions</th>
+
         </tr>
     </thead>
     <tbody>
@@ -21,6 +23,7 @@
         {
             <tr>
                 <td>@category.CategoryName</td>
+                <td>@category.CreateDate</td>
                 <td>
                     <a href="@Url.Action("UpdateCategory", "Admin", new { id = category.Id })" class="btn btn-primary">Edit</a>
                     <form asp-action="DeleteCategory" method="post" style="display:inline;">

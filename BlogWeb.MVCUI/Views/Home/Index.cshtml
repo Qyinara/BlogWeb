@@ -1,8 +1,10 @@
-﻿@{
+﻿@model IEnumerable<Blog.Entities.Models.Concrete.Post>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<h2>Home Page</h2>
+<h2 class="mb-4">Latest Posts</h2>
 
 @if (ViewBag.Message != null)
 {
@@ -11,4 +13,26 @@
     </div>
 }
 
-<p>Welcome to the home page!</p>
+<div class="row">
+    @foreach (var post in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="@post.PostImageURL" class="card-img-top" alt="@post.Title" style="max-height: 200px; object-fit: cover;" />
+                <div class="card-body">
+                    <h5 class="card-title">@post.Title</h5>
+                    <p class="text-muted">By @post.Author.UserName on @post.CreateDate</p>
+                    <p class="card-text">@post.Content.</p>
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="@Url.Action("PostDetails", "Home", new { id = post.Id })" class="btn btn-primary">Read More</a>
+                        <div class="text-end">
+                            <span class="badge bg-secondary">@post.Category.CategoryName</span><br />
+                            <span class="text-muted">Comments: @post.Comments.Count()</span><br />
+                            <span class="text-muted">Likes: @post.PostLikes.Count()</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

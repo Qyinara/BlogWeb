@@ -13,6 +13,7 @@
             <th>Email</th>
             <th>Profile Photo</th>
             <th>Role</th>
+            <th>Create Date</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -24,6 +25,7 @@
                 <td>@user.Mail</td>
                 <td><img src="@user.ProfilePhotoUrl" alt="Profile Photo" width="50" height="50" /></td>
                 <td>@user.Role</td>
+                <td>@user.CreateDate</td>
                 <td>
                     <a href="@Url.Action("UpdateUser", "Admin", new { id = user.Id })" class="btn btn-primary">Edit</a>
                     <form asp-action="DeleteUser" method="post" style="display:inline;">

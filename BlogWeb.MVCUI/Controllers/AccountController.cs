@@ -36,10 +36,12 @@ namespace BlogWeb.MVCUI.Controllers
                 return View(model);
             }
 
+            // Kullanıcıya ait claims oluşturuluyor
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName),                 
+                new Claim(ClaimTypes.Role, user.Role)                     
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -65,7 +67,7 @@ namespace BlogWeb.MVCUI.Controllers
                 LastName = model.LastName,
                 Mail = model.Mail,
                 Password = model.Password,
-                RoleId = 2, // Varsayılan olarak "User" rolü, ID'si 2
+                RoleId = 2, // Varsayılan olarak atadığım user rolü
                 Role = "User",
                 Rolee = null
             };

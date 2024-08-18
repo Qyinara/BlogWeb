@@ -13,8 +13,10 @@
     <thead>
         <tr>
             <th>Title</th>
+            <th>Content</th>
             <th>Author</th>
             <th>Category</th>
+            <th>Create Date</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,8 +25,10 @@
         {
             <tr>
                 <td>@post.Title</td>
+                <td>@post.Content</td>
                 <td>@post.Author?.UserName</td>
                 <td>@post.Category?.CategoryName</td>
+                <td>@post.CreateDate</td>
                 <td>
                     <a href="@Url.Action("UpdatePost", "Admin", new { id = post.Id })" class="btn btn-primary">Edit</a>
                     <form asp-action="DeletePost" method="post" style="display:inline;">
