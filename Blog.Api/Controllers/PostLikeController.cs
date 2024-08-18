@@ -20,14 +20,14 @@ namespace Blog.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostLike>>> GetAll()
         {
-            var postLikes = await Task.FromResult(_postLikeManager.GetAll());
+            var postLikes = await _postLikeManager.GetAllAsync(); // Asenkron metot kullanımı
             return Ok(postLikes);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PostLike>> GetById(int id)
         {
-            var postLike = await Task.FromResult(_postLikeManager.GetById(id));
+            var postLike = await _postLikeManager.GetByIdAsync(id); // Asenkron metot kullanımı
             if (postLike == null)
             {
                 return NotFound();
@@ -38,7 +38,7 @@ namespace Blog.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<PostLike>> Create(PostLike postLike)
         {
-            await Task.Run(() => _postLikeManager.Insert(postLike));
+            await _postLikeManager.InsertAsync(postLike); // Asenkron metot kullanımı
             return CreatedAtAction(nameof(GetById), new { id = postLike.Id }, postLike);
         }
 
@@ -50,14 +50,14 @@ namespace Blog.Api.Controllers
                 return BadRequest();
             }
 
-            await Task.Run(() => _postLikeManager.Update(postLike));
+            await _postLikeManager.UpdateAsync(postLike); // Asenkron metot kullanımı
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await Task.Run(() => _postLikeManager.DeleteById(id));
+            await _postLikeManager.DeleteByIdAsync(id); // Asenkron metot kullanımı
             return NoContent();
         }
     }

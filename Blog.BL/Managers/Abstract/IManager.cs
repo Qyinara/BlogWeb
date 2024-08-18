@@ -24,8 +24,9 @@ namespace Blog.BL.Managers.Abstract
 
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(int id);
+        Task InsertAsync(T entity);
         Task AddAsync(T entity);
-        Task UpdateAsync(T entity); // Bu satırı ekleyin
+        Task UpdateAsync(T entity); 
         Task DeleteByIdAsync(int id);
         Task<T> ValidateUserAsync(string username, string password);
 

@@ -1,7 +1,12 @@
-﻿@model PostDetailsViewModel
+﻿@using System.Security.Claims
+
+@model PostDetailsViewModel
 
 @{
     ViewData["Title"] = Model.Post.Title;
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool isLoggedIn = userId != null;
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-4">
@@ -13,6 +18,29 @@
                     <h2 class="card-title">@Model.Post.Title</h2>
                     <p class="text-muted">By @Model.Post.Author.UserName on @Model.Post.CreateDate.ToString("MMMM dd, yyyy")</p>
                     <p class="card-text">@Model.Post.Content</p>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        @if (isLoggedIn)
+                        {
+                            <form id="likePostForm" asp-action="LikePost" method="post" onsubmit="likePost(event)">
+                                <input type="hidden" name="postId" value="@Model.Post.Id" />
+                                @if (Model.HasLiked)
+                                {
+                                    <button type="submit" class="btn btn-danger">Unlike</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-primary">Like</button>
+                                }
+                            </form>
+                        }
+                        else
+                        {
+                            <p class="text-muted">You must be <a href="@Url.Action("Login", "Account")">logged in</a> to like this post.</p>
+                        }
+
+                        <span id="postLikesCount" class="badge bg-secondary">Likes: @Model.TotalLikes</span>
+                    </div>
                 </div>
             </div>
 
@@ -22,6 +50,8 @@
             {
                 foreach (var comment in Model.Comments)
                 {
+                    var hasLikedComment = Model.CommentLikes.Any(cl => cl.CommentId == comment.Id && cl.UserId == int.Parse(userId ?? "0"));
+
                     <div class="media mb-4">
                         <img class="d-flex mr-3 rounded-circle" src="https://via.placeholder.com/50" alt="">
                         <div class="media-body">
@@ -31,8 +61,40 @@
                             {
                                 <img src="@comment.CommentImageURL" alt="Comment Image" style="max-width: 100%; height: auto;" />
                             }
-                            <div class="text-muted">
-                                <small>Posted on @comment.CreateDate.ToString("MMMM dd, yyyy")</small>
+                            <div class="d-flex justify-content-between mt-2">
+                                <div class="text-muted">
+                                    <small>Posted on @comment.CreateDate.ToString("MMMM dd, yyyy")</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    @if (isLoggedIn)
+                                    {
+                                        <form class="likeCommentForm" data-comment-id="@comment.Id" asp-action="LikeComment" method="post" onsubmit="likeComment(event, @comment.Id)">
+                                            <input type="hidden" name="commentId" value="@comment.Id" />
+                                            <button type="submit" class="btn btn-link">
+                                                @if (hasLikedComment)
+                                                {
+                                                    @:Unlike
+                                                }
+                                                else
+                                                {
+                                                    @:Like
+                                                }
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted ml-2">You must be <a href="@Url.Action("Login", "Account")">logged in</a> to like this comment.</p>
+                                    }
+                                    <span id="commentLikesCount_@comment.Id" class="badge bg-secondary ml-2">@Model.CommentLikes.Count(cl => cl.CommentId == comment.Id)</span>
+                                </div>
+                                @if (isLoggedIn && (comment.AuthorId == int.Parse(userId) || isAdmin))
+                                {
+                                    <form asp-action="DeleteComment" method="post" style="margin-left: 15px;">
+                                        <input type="hidden" name="commentId" value="@comment.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                }
                             </div>
                         </div>
                     </div>
@@ -46,13 +108,20 @@
 
             <h4>Add a Comment</h4>
             <hr />
-            <form asp-action="AddComment" method="post">
-                <div class="form-group">
-                    <textarea class="form-control" name="Content" rows="3" placeholder="Enter your comment here..." required></textarea>
-                </div>
-                <input type="hidden" name="PostId" value="@Model.Post.Id" />
-                <button type="submit" class="btn btn-primary mt-2">Submit</button>
-            </form>
+            @if (isLoggedIn)
+            {
+                <form asp-action="AddComment" method="post">
+                    <div class="form-group">
+                        <textarea class="form-control" name="Content" rows="3" placeholder="Enter your comment here..." required></textarea>
+                    </div>
+                    <input type="hidden" name="PostId" value="@Model.Post.Id" />
+                    <button type="submit" class="btn btn-primary mt-2">Submit</button>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted">You must be <a href="@Url.Action("Login", "Account")">logged in</a> to add a comment.</p>
+            }
         </div>
 
         <div class="col-md-4">
@@ -67,3 +136,43 @@
         </div>
     </div>
 </div>
+
+<script>
+    function likePost(event) {
+        event.preventDefault();
+
+        var form = event.target;
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("postLikesCount").innerText = "Likes: " + data.totalLikes;
+                form.querySelector("button").innerText = data.hasLiked ? "Unlike" : "Like";
+                form.querySelector("button").classList.toggle("btn-primary", !data.hasLiked);
+                form.querySelector("button").classList.toggle("btn-danger", data.hasLiked);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function likeComment(event, commentId) {
+        event.preventDefault();
+
+        var form = event.target;
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("commentLikesCount_" + commentId).innerText = data.totalCommentLikes;
+                form.querySelector("button").innerText = data.hasLikedComment ? "Unlike" : "Like";
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>

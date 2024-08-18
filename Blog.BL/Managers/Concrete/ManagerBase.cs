@@ -57,6 +57,11 @@ namespace Blog.BL.Managers.Concrete
             return base.Insert(entity);
         }
 
+        public async Task InsertAsync(T entity)
+        {
+            await _context.Set<T>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
         public override int Update(T entity)
         {
             return base.Update(entity);
