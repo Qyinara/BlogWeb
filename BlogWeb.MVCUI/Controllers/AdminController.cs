@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Blog.Entities.Models.Concrete;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Blog.Entities.Models.Concrete;
 using BlogWeb.MVCUI.Models;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Blog.Entities.DbContexts;
+using X.PagedList.Extensions;
 
 namespace BlogWeb.MVCUI.Controllers
 {
@@ -17,11 +20,13 @@ namespace BlogWeb.MVCUI.Controllers
     {
         private readonly HttpClient _httpClient;
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IHttpClientFactory httpClientFactory, AppDbContext context)
+        public AdminController(IHttpClientFactory httpClientFactory, AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _httpClient = httpClientFactory.CreateClient("ApiClient");
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
@@ -29,10 +34,17 @@ namespace BlogWeb.MVCUI.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(int? page)
         {
+            // Sayfa başına gösterilecek öğe sayısı
+            int pageSize = 10;
+            // Sayfa numarası, eğer null ise 1. sayfa olarak ayarla
+            int pageNumber = page ?? 1;
+
+            // API'den kullanıcı verilerini çek
             var users = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
 
+            // Kullanıcıları ViewModel'e dönüştür
             var userViewModels = users.Select(user => new UserViewModel
             {
                 Id = user.Id,
@@ -42,8 +54,19 @@ namespace BlogWeb.MVCUI.Controllers
                 Role = user.RoleId == 1 ? "Admin" : "User"
             }).ToList();
 
-            return View(userViewModels);
+            // Kullanıcı verilerini sayfalara böl
+            var pagedUsers = userViewModels.ToPagedList(pageNumber, pageSize);
+
+            // PagedUserViewModel'e atama yap
+            var viewModel = new PagedUserViewModel
+            {
+                Users = pagedUsers
+            };
+
+            return View(viewModel);
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> UpdateUser(int id)
@@ -146,6 +169,51 @@ namespace BlogWeb.MVCUI.Controllers
             return View(category);
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateCategory(int id)
+        {
+            var category = await _httpClient.GetFromJsonAsync<Category>($"api/Category/{id}");
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var categoryViewModel = new CategoryViewModel
+            {
+                Id = category.Id,
+                CategoryName = category.CategoryName
+            };
+
+            return View(categoryViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCategory(CategoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var category = new Category
+                {
+                    Id = model.Id,
+                    CategoryName = model.CategoryName
+                };
+
+                var response = await _httpClient.PutAsJsonAsync($"api/Category/{category.Id}", category);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Categories");
+                }
+
+                ModelState.AddModelError("", "Error updating category.");
+            }
+
+            return View(model);
+        }
+
+
+
         [HttpPost]
         public async Task<IActionResult> DeleteCategory(int id)
         {
@@ -204,30 +272,25 @@ namespace BlogWeb.MVCUI.Controllers
                 ViewBag.Categories = categories;
                 ViewBag.Authors = authors;
 
-                return View(post);
+ 
             }
 
-            // Giriş yapan kullanıcının AuthorId olarak atanması
-            var userName = User.Identity.Name;
-            var currentUser = (await _httpClient.GetFromJsonAsync<List<User>>("api/User")).FirstOrDefault(u => u.UserName == userName);
-            if (currentUser != null)
+            // Dosya yükleme işlemi
+            if (post.ImageFile != null && post.ImageFile.Length > 0)
             {
-                post.AuthorId = currentUser.Id;
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts");
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(post.ImageFile.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await post.ImageFile.CopyToAsync(fileStream);
+                }
+
+                post.PostImageURL = "/images/posts/" + uniqueFileName; // PostImageURL alanına dosya yolunu ekliyoruz
             }
 
-            // Foreign key'lerin doğru atanıp atanmadığını kontrol edin
-            if (post.AuthorId == 0 || post.CategoryId == 0)
-            {
-                ModelState.AddModelError("", "AuthorId and CategoryId must be provided.");
-                var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
-                var authors = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
-
-                ViewBag.Categories = categories;
-                ViewBag.Authors = authors;
-
-                return View(post);
-            }
-
+            // API'ye post verilerini gönderme
             var response = await _httpClient.PostAsJsonAsync("api/Post", post);
 
             if (response.IsSuccessStatusCode)
@@ -245,7 +308,12 @@ namespace BlogWeb.MVCUI.Controllers
             return View(post);
         }
 
-        [HttpGet]
+    
+
+
+
+
+    [HttpGet]
         public async Task<IActionResult> UpdatePost(int id)
         {
             var post = await _httpClient.GetFromJsonAsync<Post>($"api/Post/{id}");
@@ -296,7 +364,19 @@ namespace BlogWeb.MVCUI.Controllers
                 post.Content = model.Content;
                 post.CategoryId = model.CategoryId;
                 post.AuthorId = model.AuthorId;
-                post.PostImageURL = model.PostImageURL; // Sadece URL üzerinden işlem yapıyoruz
+
+                if (model.ImageFile != null)
+                {
+                    var fileName = Path.GetFileName(model.ImageFile.FileName);
+                    var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts", fileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ImageFile.CopyToAsync(fileStream);
+                    }
+
+                    post.PostImageURL = "/images/posts/" + fileName;
+                }
 
                 var response = await _httpClient.PutAsJsonAsync($"api/Post/{post.Id}", post);
 

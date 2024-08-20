@@ -1,0 +1,17 @@
+﻿@model CategoryViewModel
+@{
+    ViewBag.Title = "Update Category";
+}
+
+<h2>Update Category</h2>
+
+<form asp-action="UpdateCategory" method="post">
+    <div class="form-group">
+        <label asp-for="CategoryName"></label>
+        <input asp-for="CategoryName" class="form-control" />
+        <span asp-validation-for="CategoryName" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Category</button>
+    <a href="@Url.Action("Categories", "Admin")" class="btn btn-secondary">Back to Categories</a>
+</form>

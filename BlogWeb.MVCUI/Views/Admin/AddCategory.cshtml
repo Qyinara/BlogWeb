@@ -7,11 +7,11 @@
 <h2>Add New Category</h2>
 
 <form asp-action="AddCategory" method="post" enctype="multipart/form-data">
-    @* Özelleştirilmiş hata mesajını burada göstereceğiz *@
+
     <div class="form-group">
-        <label asp-for="CategoryName"></label> <!-- Doğru alan ismi CategoryName -->
+        <label asp-for="CategoryName"></label> 
         <input asp-for="CategoryName" class="form-control" placeholder="Enter category name" />
-        <span asp-validation-for="CategoryName" class="text-danger"></span> <!-- Doğru alan ismi CategoryName -->
+        <span asp-validation-for="CategoryName" class="text-danger"></span> 
     </div>
 
     <button type="submit" class="btn btn-primary">Add Category</button>

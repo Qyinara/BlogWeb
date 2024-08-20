@@ -1,25 +1,48 @@
-﻿@model UserDTO
+﻿@model BlogWeb.MVCUI.Models.UserDTO
 
-@{
-    ViewData["Title"] = "Login";
-}
+<section class="vh-100">
+    <div class="container py-5 h-100">
+        <div class="row d-flex align-items-center justify-content-center h-100">
+            <div class="col-md-8 col-lg-7 col-xl-6">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+                     class="img-fluid" alt="Phone image">
+            </div>
+            <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Login</p>
+                <form asp-action="Login" method="post">
+                    <!-- UserName input -->
+                    <div class="form-outline mb-4">
+                        <input asp-for="UserName" id="form1Example13" class="form-control form-control-lg" />
+                        <label class="form-label" for="form1Example13">User Name</label>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
 
-<h2>Login</h2>
+                    <!-- Password input -->
+                    <div class="form-outline mb-4">
+                        <input asp-for="Password" id="form1Example23" class="form-control form-control-lg" type="password" />
+                        <label class="form-label" for="form1Example23">Password</label>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
 
-<form asp-action="Login" method="post">
-    <div class="form-group">
-        <label asp-for="UserName"></label>
-        <input asp-for="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <!-- Checkbox -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="form1Example3" checked />
+                            <label class="form-check-label" for="form1Example3"> Remember me </label>
+                        </div>
+                        <a href="#">Forgot your password?</a>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger mt-3">@ViewBag.ErrorMessage</div>
+                    }
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-    @if (ViewBag.ErrorMessage != null)
-    {
-        <div class="alert alert-danger mt-3">@ViewBag.ErrorMessage</div>
-    }
-</form>
+</section>
+

@@ -1,10 +1,14 @@
 ﻿using Blog.Entities.Models.Concrete;
+using X.PagedList;
 
-public class PostDetailsViewModel
+namespace BlogWeb.MVCUI.Models
 {
-    public Post Post { get; set; }
-    public List<Comment> Comments { get; set; }
-    public int TotalLikes { get; set; }
-    public bool HasLiked { get; set; }
-    public List<CommentLike> CommentLikes { get; set; } = new List<CommentLike>(); // Başlatıldı
+    public class PostDetailsViewModel
+    {
+        public Post Post { get; set; }
+        public IPagedList<Comment> PagedComments { get; set; } // Sayfalı yorumlar
+        public int TotalLikes { get; set; }
+        public bool HasLiked { get; set; }
+        public IEnumerable<CommentLike> CommentLikes { get; set; }
+    }
 }

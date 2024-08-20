@@ -1,8 +1,6 @@
-﻿@model IEnumerable<BlogWeb.MVCUI.Models.UserViewModel>
-
-@{
-    ViewBag.Title = "Users";
-}
+﻿@using X.PagedList;
+@using X.Web.PagedList;
+@model BlogWeb.MVCUI.Models.PagedUserViewModel
 
 <h2>Users</h2>
 
@@ -18,14 +16,23 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model)
+        @foreach (var user in Model.Users)
         {
             <tr>
                 <td>@user.UserName</td>
                 <td>@user.Mail</td>
-                <td><img src="@user.ProfilePhotoUrl" alt="Profile Photo" width="50" height="50" /></td>
+                <td>
+                    @if (!string.IsNullOrEmpty(user.ProfilePhotoUrl))
+                    {
+                        <img src="~/images/profilephoto/@user.ProfilePhotoUrl" alt="Profile Photo" width="50" height="50" class="rounded-circle" />
+                    }
+                    else
+                    {
+                        <img src="~/images/profilephoto/default.png" alt="Default Profile Photo" width="50" height="50" class="rounded-circle" />
+                    }
+                </td>
                 <td>@user.Role</td>
-                <td>@user.CreateDate</td>
+                <td>@user.CreateDate.ToString("MMMM dd, yyyy")</td>
                 <td>
                     <a href="@Url.Action("UpdateUser", "Admin", new { id = user.Id })" class="btn btn-primary">Edit</a>
                     <form asp-action="DeleteUser" method="post" style="display:inline;">
@@ -37,3 +44,7 @@
         }
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center my-4">
+    @Html.PagedListPager(Model.Users, page => Url.Action("Users", new { page }))
+</div>

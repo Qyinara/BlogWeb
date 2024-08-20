@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using BlogWeb.MVCUI.Models;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BlogWeb.MVCUI.Controllers
 {
@@ -14,10 +15,12 @@ namespace BlogWeb.MVCUI.Controllers
         private readonly IManager<User> _userManager;
         private readonly TokenService _tokenService;
 
-        public AccountController(IManager<User> userManager, TokenService tokenService)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public AccountController(IManager<User> userManager, TokenService tokenService, IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _tokenService = tokenService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -40,8 +43,8 @@ namespace BlogWeb.MVCUI.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),                 
-                new Claim(ClaimTypes.Role, user.Role)                     
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -58,32 +61,55 @@ namespace BlogWeb.MVCUI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(UserDTO model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            var user = new User
-            {
-                UserName = model.UserName,
-                Name = model.Name,
-                LastName = model.LastName,
-                Mail = model.Mail,
-                Password = model.Password,
-                RoleId = 2, // Varsayılan olarak atadığım user rolü
-                Role = "User",
-                Rolee = null
-            };
+            // Dosya yükleme işlemi
+            string uniqueFileName = "default.png"; // Varsayılan dosya adı
 
-            try
+            if (model.ProfilePhoto != null && model.ProfilePhoto.Length > 0)
             {
-                await _userManager.AddAsync(user);
-                ViewBag.SuccessMessage = "Registration successful! You can now login.";
-                return RedirectToAction("Login");
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profilephoto");
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePhoto.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfilePhoto.CopyToAsync(fileStream);
+                }
             }
-            catch (InvalidOperationException ex)
+
+            if (ModelState.IsValid)
             {
-                ViewBag.ErrorMessage = ex.Message;
-                return View(model);
+                var user = new User
+                {
+                    UserName = model.UserName,
+                    Name = model.Name,
+                    LastName = model.LastName,
+                    Mail = model.Mail,
+                    Password = model.Password,
+                    RoleId = 2, // Varsayılan olarak "User" rolü, ID'si 2
+                    Role = "User",
+                    ProfilePhotoUrl = uniqueFileName // Sadece dosya adını kaydediyoruz
+                };
+
+                try
+                {
+                    await _userManager.AddAsync(user);
+
+                    // Kayıt başarılı olursa login sayfasına yönlendirin
+                    return RedirectToAction("Login");
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.ErrorMessage = "Kayıt sırasında bir hata oluştu: " + ex.Message;
+                }
             }
+
+            return View(model);
         }
+
+
+
+
 
         [HttpPost]
         public async Task<IActionResult> Logout()

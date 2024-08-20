@@ -1,4 +1,6 @@
-﻿namespace BlogWeb.MVCUI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlogWeb.MVCUI.Models
 {
     public class UserViewModel
     {

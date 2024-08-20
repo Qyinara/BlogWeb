@@ -23,5 +23,6 @@ namespace Blog.Entities.Models.Concrete
         public Role? Rolee { get; set; }
 
         public ICollection<Post> Posts { get; set; } = new List<Post>(); // Eklenmesi gereken ilişki
+        public ICollection<Activity> Activities { get; set; } = new List<Activity>();
     }
-}
+}   

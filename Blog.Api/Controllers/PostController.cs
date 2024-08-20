@@ -62,7 +62,7 @@ namespace Blog.Api.Controllers
                     Category=category
                 };
                 await _postManager.AddAsync(newPost);
-                //return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
+                return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
             }
             return BadRequest(ModelState);
         }

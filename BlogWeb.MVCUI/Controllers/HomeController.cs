@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using BlogWeb.MVCUI.Models;
+using X.PagedList;
+using X.Web.PagedList;
+using X.PagedList.Extensions;
 
 namespace BlogWeb.MVCUI.Controllers
 {
@@ -16,19 +20,43 @@ namespace BlogWeb.MVCUI.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 4)
         {
             var posts = await _context.Posts
-                                .Include(p => p.Author)
-                                .Include(p => p.Category)
-                                .Include(p => p.Comments)
-                                .Include(p => p.PostLikes)
-                                .ToListAsync();
+                                      .Include(p => p.PostLikes)
+                                      .Include(p => p.Comments)
+                                      .Include(p => p.Author)
+                                      .Include(p => p.Category)
+                                      .OrderByDescending(p => p.CreateDate)
+                                      .ToListAsync();
 
-            return View(posts);
+            var postViewModels = posts.Select(post => new PostViewModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                AuthorId = post.AuthorId,
+                Author = post.Author,
+                CategoryId = post.CategoryId,
+                Category = post.Category,
+                PostImageURL = post.PostImageURL,
+                Comments = post.Comments,
+                PostLikes = post.PostLikes
+            }).ToList();
+
+            var pagedList = postViewModels.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
-        public async Task<IActionResult> PostDetails(int id)
+
+
+
+
+
+
+
+        public async Task<IActionResult> PostDetails(int id, int page = 1, int pageSize = 5)
         {
             var post = await _context.Posts
                 .Include(p => p.Author)
@@ -39,24 +67,29 @@ namespace BlogWeb.MVCUI.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null)
-            {
+            {   
                 return NotFound();
             }
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
             var hasLiked = post.PostLikes.Any(pl => pl.UserId == userId);
 
+            var pagedComments = post.Comments.OrderByDescending(c => c.CreateDate)
+                                              .ToPagedList(page, pageSize);
+
             var viewModel = new PostDetailsViewModel
             {
                 Post = post,
-                Comments = post.Comments.ToList(),
+                PagedComments = pagedComments,
                 TotalLikes = post.PostLikes.Count,
                 HasLiked = hasLiked,
-                CommentLikes = await _context.CommentLikes.ToListAsync() // CommentLikes'i de dahil ettik
+                CommentLikes = await _context.CommentLikes.ToListAsync()
             };
 
             return View(viewModel);
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> AddComment(int PostId, string Content)
@@ -65,7 +98,15 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                TempData["Error"] = "You must be logged in to comment.";
+                return RedirectToAction("PostDetails", new { id = PostId });
+            }
+
+            var post = await _context.Posts.FindAsync(PostId);
+            if (post == null)
+            {
+                TempData["Error"] = "Post not found.";
+                return RedirectToAction("PostDetails", new { id = PostId });
             }
 
             var comment = new Comment
@@ -75,12 +116,13 @@ namespace BlogWeb.MVCUI.Controllers
                 AuthorId = int.Parse(userId),
                 CreateDate = DateTime.Now
             };
-
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("PostDetails", new { id = PostId });
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> LikeComment(int commentId)
@@ -95,9 +137,24 @@ namespace BlogWeb.MVCUI.Controllers
             var existingLike = await _context.CommentLikes
                 .FirstOrDefaultAsync(cl => cl.CommentId == commentId && cl.UserId == userId);
 
+            var comment = await _context.Comments
+                .Include(c => c.Post)
+                .FirstOrDefaultAsync(c => c.Id == commentId);
+
             if (existingLike != null)
             {
                 _context.CommentLikes.Remove(existingLike);
+
+                // Activity kaydýný sil
+                var activity = await _context.Activities
+                    .FirstOrDefaultAsync(a => a.UserId == userId
+                                              && a.ActivityType == "Comment Like"
+                                              && a.Description.Contains($"liked a comment on the post '{comment.Post.Title}'")
+                                              && a.Description.Contains($"with content: '{comment.Content}'"));
+                if (activity != null)
+                {
+                    _context.Activities.Remove(activity);
+                }
             }
             else
             {
@@ -106,22 +163,32 @@ namespace BlogWeb.MVCUI.Controllers
                     CommentId = commentId,
                     UserId = userId
                 };
-
                 _context.CommentLikes.Add(commentLike);
+
+                var activity = new Activity
+                {
+                    UserId = userId,
+                    ActivityType = "Comment Like",
+                    Description = $"You liked a comment on the post '{comment.Post.Title}' with content: '{comment.Content}'",
+                    ActivityDate = DateTime.Now
+                };
+                _context.Activities.Add(activity);
             }
 
             await _context.SaveChangesAsync();
 
-            var comment = await _context.Comments.Include(c => c.CommentLikes).FirstOrDefaultAsync(c => c.Id == commentId);
             var hasLikedComment = comment.CommentLikes.Any(cl => cl.UserId == userId);
 
             return Json(new { totalCommentLikes = comment.CommentLikes.Count, hasLikedComment });
         }
 
+
         [HttpPost]
         public async Task<IActionResult> DeleteComment(int commentId)
         {
-            var comment = await _context.Comments.FindAsync(commentId);
+            var comment = await _context.Comments
+                .Include(c => c.Post)
+                .FirstOrDefaultAsync(c => c.Id == commentId);
 
             if (comment == null)
             {
@@ -136,17 +203,26 @@ namespace BlogWeb.MVCUI.Controllers
                 return Forbid(); // Kullanýcý ne admin ne de yorumun sahibi deðilse, eriþim engellenir.
             }
 
+            // Yorumla iliþkili Activity kayýtlarýný sil
+            var relatedActivities = await _context.Activities
+                .Where(a => a.Description.Contains($"commented on the post '{comment.Post.Title}'") ||
+                            a.Description.Contains($"liked a comment on the post '{comment.Post.Title}'"))
+                .ToListAsync();
+
+            _context.Activities.RemoveRange(relatedActivities);
+
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("PostDetails", new { id = comment.PostId });
         }
 
+
         [HttpPost]
         public async Task<IActionResult> LikePost(int postId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            var post = await _context.Posts.FindAsync(postId);
             if (userId == null)
             {
                 return Unauthorized(); // Eðer kullanýcý giriþ yapmamýþsa, yetkisiz eriþim döndür.
@@ -160,6 +236,14 @@ namespace BlogWeb.MVCUI.Controllers
             if (existingLike != null)
             {
                 _context.PostLikes.Remove(existingLike);
+
+                // Activity kaydýný sil
+                var activity = await _context.Activities
+                    .FirstOrDefaultAsync(a => a.UserId == userIntId && a.ActivityType == "Post Like" && a.Description.Contains($"liked the post '{post.Title}'"));
+                if (activity != null)
+                {
+                    _context.Activities.Remove(activity);
+                }
             }
             else
             {
@@ -171,15 +255,85 @@ namespace BlogWeb.MVCUI.Controllers
                 };
 
                 _context.PostLikes.Add(postLike);
+
+                var activity = new Activity
+                {
+                    UserId = userIntId,
+                    ActivityType = "Post Like",
+                    Description = $"You liked the post '{post.Title}'",
+                    ActivityDate = DateTime.Now
+                };
+                _context.Activities.Add(activity);
             }
 
             await _context.SaveChangesAsync();
 
-            var post = await _context.Posts.Include(p => p.PostLikes).FirstOrDefaultAsync(p => p.Id == postId);
+            post = await _context.Posts.Include(p => p.PostLikes).FirstOrDefaultAsync(p => p.Id == postId);
             var hasLiked = post.PostLikes.Any(pl => pl.UserId == userIntId);
 
             return Json(new { totalLikes = post.PostLikes.Count, hasLiked });
         }
 
+
+
+
+
+        [HttpGet]
+        public IActionResult Profile(int userId, int page = 1, int pageSize = 5)
+        {
+            var user = _context.Users
+                .Include(u => u.Activities)
+                .FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var activities = _context.Activities
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.ActivityDate)
+                .ToPagedList(page, pageSize); // Sayfalama ekleniyor
+
+            var viewModel = new ProfileViewModel
+            {
+                User = user,
+                Activities = activities
+            };
+
+            return View(viewModel);
+        }
+
+
+        [HttpGet]
+        public IActionResult Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var users = _context.Users
+                .Where(u => u.UserName.Contains(query) || u.Mail.Contains(query))
+                .ToList();
+
+            if (users.Count == 1)
+            {
+                // Eðer sadece bir kullanýcý varsa, doðrudan profil sayfasýna yönlendir
+                return RedirectToAction("Profile", new { userId = users.First().Id });
+            }
+
+            // Birden fazla sonuç varsa, arama sonuçlarý sayfasýna yönlendir (Bu sayfa için view oluþturmanýz gerekecek)
+            return View("SearchResults", users);
+        }
+
+
+
     }
+
+
+
+
+
+
 }

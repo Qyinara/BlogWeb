@@ -1,12 +1,15 @@
-﻿@model PostViewModel
+﻿@using System.Security.Claims;
+@model PostViewModel
 
 @{
     ViewBag.Title = "Add New Post";
+    var loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var loggedInUserName = User.Identity.Name;
 }
 
 <h2>Add New Post</h2>
 
-<form asp-action="AddPost" method="post">
+<form asp-action="AddPost" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Title"></label>
         <input asp-for="Title" class="form-control" placeholder="Enter post title" />
@@ -31,30 +34,22 @@
         <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
 
+    <!-- Giriş yapan kullanıcıyı Author olarak ayarlayın -->
+    <input type="hidden" asp-for="AuthorId" value="@loggedInUserId" />
     <div class="form-group">
-        <label asp-for="AuthorId">Select Author</label>
-        <select asp-for="AuthorId" class="form-control">
-            <option value="">Select Author</option>
-            @if (ViewBag.Authors != null)
-            {
-                @foreach (var author in ViewBag.Authors)
-                {
-                    <option value="@author.Id">@author.UserName</option>
-                }
-            }
-            else
-            {
-                <option disabled>Author listesi yüklenemedi. Lütfen daha sonra tekrar deneyin.</option>
-            }
-        </select>
-        <span asp-validation-for="AuthorId" class="text-danger"></span>
+        <label>Author</label>
+        <input type="text" class="form-control" value="@loggedInUserName" readonly />
     </div>
 
-    <div class="form-group">
-        <label asp-for="PostImageURL">Image URL</label>
-        <input asp-for="PostImageURL" class="form-control" placeholder="Enter image URL" />
-        <span asp-validation-for="PostImageURL" class="text-danger"></span>
+    <div class="d-flex flex-row align-items-center mb-4">
+        <i class="fas fa-camera fa-lg me-3 fa-fw"></i>
+        <div class="form-outline flex-fill mb-0">
+            <input asp-for="ImageFile" class="form-control-file" type="file" />
+            <label class="form-label">Post Image (Not Required)</label>
+            <span asp-validation-for="PostImageURL" class="text-danger"></span>
+        </div>
     </div>
+
 
     <button type="submit" class="btn btn-primary">Add Post</button>
     <a href="@Url.Action("Posts", "Admin")" class="btn btn-secondary">Back to Posts</a>
