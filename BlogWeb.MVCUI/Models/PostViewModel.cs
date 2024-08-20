@@ -16,7 +16,7 @@ namespace BlogWeb.MVCUI.Models
         public Category Category { get; set; }
         public string? PostImageURL { get; set; }
         public IFormFile? ImageFile { get; set; } 
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; set; } = DateTime.Now;
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<PostLike> PostLikes { get; set; } = new List<PostLike>();
     }

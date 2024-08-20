@@ -1,13 +1,46 @@
-﻿@model IEnumerable<Blog.Entities.Models.Concrete.Post>
+﻿@using X.PagedList;
+
+@model IPagedList<Blog.Entities.Models.Concrete.Post>
 
 @{
     ViewBag.Title = "Posts";
-
 }
 
 <h2>Posts</h2>
 
-<a href="@Url.Action("AddPost", "Admin")" class="btn btn-primary mb-3">Add New Post</a>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a href="@Url.Action("AddPost", "Admin")" class="btn btn-primary mb-3">Add New Post</a>
+    </div>
+    <div class="col-md-9">
+        <form method="get" action="@Url.Action("Posts", "Admin")">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="searchQuery" value="@ViewBag.SearchQuery" class="form-control" placeholder="Search by post title..." />
+                </div>
+                <div class="col-md-4">
+                    <select name="authorFilter" class="form-control">
+                        <option value="">Select Author...</option>
+                        @foreach (var author in ViewBag.Authors)
+                        {
+                            @if (ViewBag.AuthorFilter == author.Id)
+                            {
+                                <option value="@author.Id" selected>@author.UserName</option>
+                            }
+                            else
+                            {
+                                <option value="@author.Id">@author.UserName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary ms-3">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 <table class="table">
     <thead>
@@ -40,3 +73,34 @@
         }
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center my-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Posts", new { page = Model.PageNumber - 1 })" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            }
+
+            @for (int i = 1; i <= Model.PageCount; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Posts", new { page = i })">@i</a>
+                </li>
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Posts", new { page = Model.PageNumber + 1 })" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

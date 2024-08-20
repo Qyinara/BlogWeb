@@ -1,13 +1,26 @@
-﻿@model IEnumerable<Blog.Entities.Models.Concrete.Category>
+﻿@using X.PagedList;
+
+@model IPagedList<Blog.Entities.Models.Concrete.Category>
 
 @{
     ViewBag.Title = "Categories";
-
 }
 
 <h2>Categories</h2>
 
-<a href="@Url.Action("AddCategory", "Admin")" class="btn btn-primary mb-3">Add New Category</a>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a href="@Url.Action("AddCategory", "Admin")" class="btn btn-primary mb-3">Add New Category</a>
+    </div>
+    <div class="col-md-9">
+        <form method="get" action="@Url.Action("Categories", "Admin")">
+            <div class="input-group">
+                <input type="text" name="searchQuery" value="@ViewBag.SearchQuery" class="form-control" placeholder="Search by category name..." />
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <table class="table">
     <thead>
@@ -15,7 +28,6 @@
             <th>Name</th>
             <th>Create Date</th>
             <th>Actions</th>
-
         </tr>
     </thead>
     <tbody>
@@ -23,10 +35,8 @@
         {
             <tr>
                 <td>@category.CategoryName</td>
-                <td>@category.CreateDate</td>
-               
+                <td>@category.CreateDate.ToString("MMMM dd, yyyy")</td>
                 <td>
- 
                     <a href="@Url.Action("UpdateCategory", "Admin", new { id = category.Id })" class="btn btn-primary">Edit</a>
                     <form asp-action="DeleteCategory" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="@category.Id" />
@@ -37,3 +47,34 @@
         }
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center my-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            @if (Model.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Categories", new { page = Model.PageNumber - 1, searchQuery = ViewBag.SearchQuery })" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            }
+
+            @for (int i = 1; i <= Model.PageCount; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Categories", new { page = i, searchQuery = ViewBag.SearchQuery })">@i</a>
+                </li>
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Categories", new { page = Model.PageNumber + 1, searchQuery = ViewBag.SearchQuery })" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

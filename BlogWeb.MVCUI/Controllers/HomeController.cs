@@ -20,16 +20,33 @@ namespace BlogWeb.MVCUI.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 4)
+        public async Task<IActionResult> Index(string titleFilter = null, int? categoryFilter = null, int page = 1, int pageSize = 4)
         {
-            var posts = await _context.Posts
-                                      .Include(p => p.PostLikes)
-                                      .Include(p => p.Comments)
-                                      .Include(p => p.Author)
-                                      .Include(p => p.Category)
-                                      .OrderByDescending(p => p.CreateDate)
-                                      .ToListAsync();
+            // Postlarý veritabanýndan çekiyoruz
+            var postsQuery = _context.Posts
+                                     .Include(p => p.PostLikes)
+                                     .Include(p => p.Comments)
+                                     .Include(p => p.Author)
+                                     .Include(p => p.Category)
+                                     .OrderByDescending(p => p.CreateDate)
+                                     .AsQueryable();
 
+            // Category filter uygulama
+            if (categoryFilter.HasValue && categoryFilter.Value > 0)
+            {
+                postsQuery = postsQuery.Where(p => p.CategoryId == categoryFilter.Value);
+            }
+
+            // Postlarý veritabanýndan alýyoruz ve title filter'i bellek üzerinde uyguluyoruz
+            var posts = await postsQuery.ToListAsync();
+
+            // Title filter uygulama
+            if (!string.IsNullOrEmpty(titleFilter))
+            {
+                posts = posts.Where(p => p.Title.Contains(titleFilter, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Postlarý PostViewModel'e dönüþtürüyoruz
             var postViewModels = posts.Select(post => new PostViewModel
             {
                 Id = post.Id,
@@ -44,12 +61,16 @@ namespace BlogWeb.MVCUI.Controllers
                 PostLikes = post.PostLikes
             }).ToList();
 
+            // Postlarý sayfalara bölüyoruz
             var pagedList = postViewModels.ToPagedList(page, pageSize);
+
+            // Kategorileri ViewBag'e ekliyoruz
+            ViewBag.Categories = await _context.Categories.ToListAsync();
+            ViewBag.TitleFilter = titleFilter;
+            ViewBag.CategoryFilter = categoryFilter;
 
             return View(pagedList);
         }
-
-
 
 
 

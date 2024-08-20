@@ -12,6 +12,7 @@ using BlogWeb.MVCUI.Models;
 using Microsoft.EntityFrameworkCore;
 using Blog.Entities.DbContexts;
 using X.PagedList.Extensions;
+using X.PagedList;
 
 namespace BlogWeb.MVCUI.Controllers
 {
@@ -34,17 +35,37 @@ namespace BlogWeb.MVCUI.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Users(int? page)
+        public async Task<IActionResult> Users(string searchQuery, string roleFilterAdmin,string roleFilterUser,int? page)
         {
-            // Sayfa başına gösterilecek öğe sayısı
+
             int pageSize = 10;
-            // Sayfa numarası, eğer null ise 1. sayfa olarak ayarla
+
             int pageNumber = page ?? 1;
 
-            // API'den kullanıcı verilerini çek
+
             var users = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
 
-            // Kullanıcıları ViewModel'e dönüştür
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                users = users.Where(u => u.UserName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                         u.Mail.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(roleFilterAdmin) && string.IsNullOrEmpty(roleFilterUser))
+            {
+                users = users.Where(u => u.RoleId == 1).ToList(); // Sadece Admin
+            }
+            else if (string.IsNullOrEmpty(roleFilterAdmin) && !string.IsNullOrEmpty(roleFilterUser))
+            {
+                users = users.Where(u => u.RoleId == 2).ToList(); // Sadece User
+            }
+            else if (!string.IsNullOrEmpty(roleFilterAdmin) && !string.IsNullOrEmpty(roleFilterUser))
+            {
+                // Eğer her iki checkbox işaretliyse, tüm rolleri getir
+            }
+
+
             var userViewModels = users.Select(user => new UserViewModel
             {
                 Id = user.Id,
@@ -54,14 +75,19 @@ namespace BlogWeb.MVCUI.Controllers
                 Role = user.RoleId == 1 ? "Admin" : "User"
             }).ToList();
 
-            // Kullanıcı verilerini sayfalara böl
+
             var pagedUsers = userViewModels.ToPagedList(pageNumber, pageSize);
 
-            // PagedUserViewModel'e atama yap
+    
             var viewModel = new PagedUserViewModel
             {
                 Users = pagedUsers
             };
+
+
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.RoleFilter = roleFilterAdmin ?? roleFilterUser;
+
 
             return View(viewModel);
         }
@@ -132,11 +158,29 @@ namespace BlogWeb.MVCUI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Categories()
+        public async Task<IActionResult> Categories(string searchQuery, int? page)
         {
+            int pageSize = 10;  // Sayfa başına gösterilecek kategori sayısı
+            int pageNumber = page ?? 1;
+
+            // Kategorileri API'den çekiyoruz
             var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
-            return View(categories);
+
+            // Arama filtresi
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                categories = categories.Where(c => c.CategoryName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Sayfalama için kategorileri IPagedList'e dönüştürüyoruz
+            var pagedCategories = categories.ToPagedList(pageNumber, pageSize);
+
+            // Arama sorgusunu ve kategorileri ViewBag'e ekliyoruz
+            ViewBag.SearchQuery = searchQuery;
+
+            return View(pagedCategories);
         }
+
 
         [HttpGet]
         public IActionResult AddCategory()
@@ -228,15 +272,51 @@ namespace BlogWeb.MVCUI.Controllers
             return RedirectToAction("Categories");
         }
 
-        public async Task<IActionResult> Posts()
+
+
+
+
+        public IActionResult Posts(string searchQuery, int? authorFilter, int? categoryFilter, int? page)
         {
-            var posts = await _context.Posts
-                .Include(p => p.Author)
-                .Include(p => p.Category)
-                .ToListAsync();
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var authors = _context.Users
+                                  .Where(u => u.RoleId == 1)  // Sadece admin olan kullanıcılar
+                                  .ToList();
+
+            ViewBag.Authors = authors;
+
+            var postsQuery = _context.Posts
+                                     .Include(p => p.Author)
+                                     .Include(p => p.Category)
+                                     .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                postsQuery = postsQuery.Where(p => p.Title.Contains(searchQuery));
+            }
+
+            if (authorFilter.HasValue)
+            {
+                postsQuery = postsQuery.Where(p => p.AuthorId == authorFilter.Value);
+            }
+
+            if (categoryFilter.HasValue)
+            {
+                postsQuery = postsQuery.Where(p => p.CategoryId == categoryFilter.Value);
+            }
+
+            var posts = postsQuery.ToPagedList(pageNumber, pageSize);
 
             return View(posts);
         }
+
+
+
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> AddPost()
