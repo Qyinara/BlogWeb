@@ -46,14 +46,14 @@
                 <div class="col-lg-6 col-md-6 mb-4">
                     <div class="card mb-4 card-hover" style="height: 200px;">
                         <div class="row g-0 align-items-center">
-                            <!-- Resim -->
+                           
                             <div class="col-md-4">
                                 <a href="@Url.Action("PostDetails", "Home", new { id = post.Id })">
                                     <img src="@post.PostImageURL" class="img-fluid rounded-start" alt="@post.Title" style="height: 200px; object-fit: cover;">
                                 </a>
                             </div>
                             <div class="col-md-8">
-                                <!-- Kart Gövdesi -->
+                              
                                 <div class="card-body p-2">
                                     <a href="#" class="badge bg-warning mb-1">@post.Category.CategoryName</a>
                                     <h5 class="card-title">
@@ -62,7 +62,7 @@
                                         </a>
                                     </h5>
                                     <p class="card-text mb-1" style="font-size: 0.9rem;">@post.Content</p>
-                                    <!-- Media İçeriği -->
+                                    
                                     <div class="d-flex align-items-center">
                                         <div class="me-2">
                                             <img src="~/images/profilephoto/@post.Author.ProfilePhotoUrl" alt="@post.Author.UserName" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">

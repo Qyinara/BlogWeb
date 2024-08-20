@@ -63,8 +63,8 @@ namespace BlogWeb.MVCUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // Dosya yükleme işlemi
-            string uniqueFileName = "default.png"; // Varsayılan dosya adı
+            
+            string uniqueFileName = "default.png"; 
 
             if (model.ProfilePhoto != null && model.ProfilePhoto.Length > 0)
             {
@@ -86,16 +86,16 @@ namespace BlogWeb.MVCUI.Controllers
                     LastName = model.LastName,
                     Mail = model.Mail,
                     Password = model.Password,
-                    RoleId = 2, // Varsayılan olarak "User" rolü, ID'si 2
+                    RoleId = 2, 
                     Role = "User",
-                    ProfilePhotoUrl = uniqueFileName // Sadece dosya adını kaydediyoruz
+                    ProfilePhotoUrl = uniqueFileName 
                 };
 
                 try
                 {
                     await _userManager.AddAsync(user);
 
-                    // Kayıt başarılı olursa login sayfasına yönlendirin
+              
                     return RedirectToAction("Login");
                 }
                 catch (Exception ex)

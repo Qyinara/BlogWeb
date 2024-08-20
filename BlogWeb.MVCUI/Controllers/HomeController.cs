@@ -22,7 +22,7 @@ namespace BlogWeb.MVCUI.Controllers
 
         public async Task<IActionResult> Index(string titleFilter = null, int? categoryFilter = null, int page = 1, int pageSize = 4)
         {
-            // Postlarý veritabanýndan çekiyoruz
+         
             var postsQuery = _context.Posts
                                      .Include(p => p.PostLikes)
                                      .Include(p => p.Comments)
@@ -31,22 +31,21 @@ namespace BlogWeb.MVCUI.Controllers
                                      .OrderByDescending(p => p.CreateDate)
                                      .AsQueryable();
 
-            // Category filter uygulama
+          
             if (categoryFilter.HasValue && categoryFilter.Value > 0)
             {
                 postsQuery = postsQuery.Where(p => p.CategoryId == categoryFilter.Value);
             }
 
-            // Postlarý veritabanýndan alýyoruz ve title filter'i bellek üzerinde uyguluyoruz
             var posts = await postsQuery.ToListAsync();
 
-            // Title filter uygulama
+          
             if (!string.IsNullOrEmpty(titleFilter))
             {
                 posts = posts.Where(p => p.Title.Contains(titleFilter, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Postlarý PostViewModel'e dönüþtürüyoruz
+      
             var postViewModels = posts.Select(post => new PostViewModel
             {
                 Id = post.Id,
@@ -61,10 +60,10 @@ namespace BlogWeb.MVCUI.Controllers
                 PostLikes = post.PostLikes
             }).ToList();
 
-            // Postlarý sayfalara bölüyoruz
+         
             var pagedList = postViewModels.ToPagedList(page, pageSize);
 
-            // Kategorileri ViewBag'e ekliyoruz
+     
             ViewBag.Categories = await _context.Categories.ToListAsync();
             ViewBag.TitleFilter = titleFilter;
             ViewBag.CategoryFilter = categoryFilter;
@@ -166,7 +165,7 @@ namespace BlogWeb.MVCUI.Controllers
             {
                 _context.CommentLikes.Remove(existingLike);
 
-                // Activity kaydýný sil
+           
                 var activity = await _context.Activities
                     .FirstOrDefaultAsync(a => a.UserId == userId
                                               && a.ActivityType == "Comment Like"
@@ -221,10 +220,10 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (comment.AuthorId != userId && !isAdmin)
             {
-                return Forbid(); // Kullanýcý ne admin ne de yorumun sahibi deðilse, eriþim engellenir.
+                return Forbid(); 
             }
 
-            // Yorumla iliþkili Activity kayýtlarýný sil
+          
             var relatedActivities = await _context.Activities
                 .Where(a => a.Description.Contains($"commented on the post '{comment.Post.Title}'") ||
                             a.Description.Contains($"liked a comment on the post '{comment.Post.Title}'"))
@@ -246,7 +245,7 @@ namespace BlogWeb.MVCUI.Controllers
             var post = await _context.Posts.FindAsync(postId);
             if (userId == null)
             {
-                return Unauthorized(); // Eðer kullanýcý giriþ yapmamýþsa, yetkisiz eriþim döndür.
+                return Unauthorized(); 
             }
 
             var userIntId = int.Parse(userId);
@@ -258,7 +257,7 @@ namespace BlogWeb.MVCUI.Controllers
             {
                 _context.PostLikes.Remove(existingLike);
 
-                // Activity kaydýný sil
+           
                 var activity = await _context.Activities
                     .FirstOrDefaultAsync(a => a.UserId == userIntId && a.ActivityType == "Post Like" && a.Description.Contains($"liked the post '{post.Title}'"));
                 if (activity != null)
@@ -314,7 +313,7 @@ namespace BlogWeb.MVCUI.Controllers
             var activities = _context.Activities
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.ActivityDate)
-                .ToPagedList(page, pageSize); // Sayfalama ekleniyor
+                .ToPagedList(page, pageSize);
 
             var viewModel = new ProfileViewModel
             {
@@ -340,11 +339,10 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (users.Count == 1)
             {
-                // Eðer sadece bir kullanýcý varsa, doðrudan profil sayfasýna yönlendir
+               
                 return RedirectToAction("Profile", new { userId = users.First().Id });
             }
 
-            // Birden fazla sonuç varsa, arama sonuçlarý sayfasýna yönlendir (Bu sayfa için view oluþturmanýz gerekecek)
             return View("SearchResults", users);
         }
 

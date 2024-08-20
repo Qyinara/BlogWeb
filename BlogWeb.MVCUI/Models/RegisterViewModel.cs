@@ -7,7 +7,7 @@
         public string LastName { get; set; }
         public string Mail { get; set; }
         public string Password { get; set; }
-        public IFormFile? ProfilePhoto { get; set; } // Dosya yükleme işlemi için
+        public IFormFile? ProfilePhoto { get; set; } 
     }
 
 

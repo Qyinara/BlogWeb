@@ -54,15 +54,15 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (!string.IsNullOrEmpty(roleFilterAdmin) && string.IsNullOrEmpty(roleFilterUser))
             {
-                users = users.Where(u => u.RoleId == 1).ToList(); // Sadece Admin
+                users = users.Where(u => u.RoleId == 1).ToList(); 
             }
             else if (string.IsNullOrEmpty(roleFilterAdmin) && !string.IsNullOrEmpty(roleFilterUser))
             {
-                users = users.Where(u => u.RoleId == 2).ToList(); // Sadece User
+                users = users.Where(u => u.RoleId == 2).ToList(); 
             }
             else if (!string.IsNullOrEmpty(roleFilterAdmin) && !string.IsNullOrEmpty(roleFilterUser))
             {
-                // Eğer her iki checkbox işaretliyse, tüm rolleri getir
+                // Eğer her iki checkbox işaretliyse tüm rolleri getir
             }
 
 
@@ -160,22 +160,22 @@ namespace BlogWeb.MVCUI.Controllers
         [HttpGet]
         public async Task<IActionResult> Categories(string searchQuery, int? page)
         {
-            int pageSize = 10;  // Sayfa başına gösterilecek kategori sayısı
+            int pageSize = 10;  
             int pageNumber = page ?? 1;
 
-            // Kategorileri API'den çekiyoruz
+         
             var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
 
-            // Arama filtresi
+          
             if (!string.IsNullOrEmpty(searchQuery))
             {
                 categories = categories.Where(c => c.CategoryName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Sayfalama için kategorileri IPagedList'e dönüştürüyoruz
+           
             var pagedCategories = categories.ToPagedList(pageNumber, pageSize);
 
-            // Arama sorgusunu ve kategorileri ViewBag'e ekliyoruz
+ 
             ViewBag.SearchQuery = searchQuery;
 
             return View(pagedCategories);
@@ -282,7 +282,7 @@ namespace BlogWeb.MVCUI.Controllers
             int pageNumber = page ?? 1;
 
             var authors = _context.Users
-                                  .Where(u => u.RoleId == 1)  // Sadece admin olan kullanıcılar
+                                  .Where(u => u.RoleId == 1)  
                                   .ToList();
 
             ViewBag.Authors = authors;
@@ -323,14 +323,14 @@ namespace BlogWeb.MVCUI.Controllers
         {
             var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
 
-            // Giriş yapan kullanıcıyı al
+
             var userName = User.Identity.Name;
             var authors = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
             var currentUser = authors.FirstOrDefault(u => u.UserName == userName);
 
             ViewBag.Categories = categories;
             ViewBag.Authors = authors;
-            ViewBag.AuthorId = currentUser?.Id; // AuthorId'yi ViewBag ile View'e gönder
+            ViewBag.AuthorId = currentUser?.Id; 
 
             return View(new PostViewModel());
         }
@@ -345,7 +345,7 @@ namespace BlogWeb.MVCUI.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Hataları tekrar kullanıcıya göster
+            
                 var categories = await _httpClient.GetFromJsonAsync<List<Category>>("api/Category");
                 var authors = await _httpClient.GetFromJsonAsync<List<User>>("api/User");
 
@@ -367,10 +367,9 @@ namespace BlogWeb.MVCUI.Controllers
                     await post.ImageFile.CopyToAsync(fileStream);
                 }
 
-                post.PostImageURL = "/images/posts/" + uniqueFileName; // PostImageURL alanına dosya yolunu ekliyoruz
+                post.PostImageURL = "/images/posts/" + uniqueFileName; 
             }
 
-            // API'ye post verilerini gönderme
             var response = await _httpClient.PostAsJsonAsync("api/Post", post);
 
             if (response.IsSuccessStatusCode)
